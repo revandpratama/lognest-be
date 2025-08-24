@@ -3,8 +3,9 @@ package cmd
 import (
 	"fmt"
 
-	projectEntity "github.com/revandpratama/lognest/internal/modules/project/entity"
 	logEntity "github.com/revandpratama/lognest/internal/modules/log/entity"
+	projectEntity "github.com/revandpratama/lognest/internal/modules/project/entity"
+	userProfileEntity "github.com/revandpratama/lognest/internal/modules/user-profile/entity"
 	"gorm.io/gorm"
 )
 
@@ -17,6 +18,7 @@ func MigrateDatabase(db *gorm.DB) error {
 	var models = []interface{}{
 		&projectEntity.Project{},
 		&logEntity.Log{},
+		&userProfileEntity.UserProfile{},
 	}
 
 	return db.AutoMigrate(models...)
