@@ -87,7 +87,7 @@ func (r *projectRepository) Create(ctx context.Context, newProject *entity.Proje
 }
 
 func (r *projectRepository) Update(ctx context.Context, id uuid.UUID, updateProject *entity.Project) (*entity.Project, error) {
-	err := r.db.WithContext(ctx).Where("id = ?", id).Updates(updateProject).Error
+	err := r.db.WithContext(ctx).Model(&entity.Project{}).Where("id = ?", id).Updates(updateProject).Error
 
 	return updateProject, err
 }
