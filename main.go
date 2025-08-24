@@ -55,7 +55,19 @@ func main() {
 		},
 	}
 
-	rootCmd.AddCommand(migrateCmd)
+	var generateCmd = &cobra.Command{
+		Use:   "generate",
+		Short: "Generate modules",
+		Run: func(cmd *cobra.Command, args []string) {
+			log.Info().Msg("Generating modules...")
+
+			server := NewServer()
+			server.GenerateModule(args[0])
+			// run your migrations here
+		},
+	}
+
+	rootCmd.AddCommand(migrateCmd, generateCmd)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -129,4 +141,8 @@ func (s *Server) Migrate() {
 	if err := apps.Stop(); err != nil {
 		log.Error().Err(err).Msgf("failed to stop app cleanly, cause: %v", err)
 	}
+}
+
+func (s *Server) GenerateModule(moduleName string) {
+	cmd.GenerateModule(moduleName)
 }
