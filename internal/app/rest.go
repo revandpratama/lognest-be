@@ -9,6 +9,8 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/revandpratama/lognest/config"
 	route "github.com/revandpratama/lognest/internal/routes"
+
+	// "github.com/revandpratama/lognest/internal/routes"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,8 +27,8 @@ func WithRESTServer() Option {
 		})
 
 		fiberApp.Use(limiter.New(limiter.Config{
-			Max:        50,            
-			Expiration: 5 * time.Second, 
+			Max:        50,
+			Expiration: 5 * time.Second,
 			KeyGenerator: func(c *fiber.Ctx) string {
 				return c.IP()
 			},
@@ -41,14 +43,13 @@ func WithRESTServer() Option {
 
 		api := fiberApp.Group("/api")
 
-		
 		api.Get("/test-700ms", func(c *fiber.Ctx) error {
 			time.Sleep(500 * time.Millisecond)
 			return c.SendString("Hello. 700ms delay!")
 		})
 
 		// * Initialize routes
-		route.InitRoutes(api)
+		route.InitRoutes(api, app.DB)
 
 		app.fiberApp = fiberApp
 
