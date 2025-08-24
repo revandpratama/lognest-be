@@ -9,8 +9,6 @@ type APIResponse struct {
 	Status     string                `json:"status"`
 	Message    string                `json:"message"`
 	Data       any                   `json:"data,omitempty"`
-	Error      any                   `json:"error,omitempty"`
-	Pagination pagination.Pagination `json:"pagination,omitempty"`
 }
 
 type PaginatedResponse struct {
