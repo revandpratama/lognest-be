@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	projectEntity "github.com/revandpratama/lognest/internal/modules/project/entity"
+	logEntity "github.com/revandpratama/lognest/internal/modules/log/entity"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +16,7 @@ func MigrateDatabase(db *gorm.DB) error {
 
 	var models = []interface{}{
 		&projectEntity.Project{},
+		&logEntity.Log{},
 	}
 
 	return db.AutoMigrate(models...)
