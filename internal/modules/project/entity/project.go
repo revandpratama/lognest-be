@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/revandpratama/lognest/config"
+	"github.com/revandpratama/lognest/internal/modules/log/entity"
 	"gorm.io/gorm"
 )
 
@@ -22,7 +23,7 @@ type Project struct {
 
 	// --- Relationships ---
 	// User User  `gorm:"foreignKey:UserID" json:"user"`
-	// Logs []Log `gorm:"foreignKey:ProjectID;constraint:OnDelete:CASCADE;" json:"logs,omitempty"` // CASCADE means if project is deleted, its logs are too
+	Logs []entity.Log `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;" json:"logs,omitempty"` // CASCADE means if project is deleted, its logs are too
 	// Tags []Tag `gorm:"many2many:project_tags;" json:"tags,omitempty"`
 }
 
