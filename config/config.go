@@ -19,6 +19,9 @@ type Config struct {
 	DB_USER     string `mapstructure:"DB_USER"`
 	DB_PASSWORD string `mapstructure:"DB_PASSWORD"`
 	DB_NAME     string `mapstructure:"DB_NAME"`
+
+	LOGNEST_SCHEMA string `mapstructure:"LOGNEST_SCHEMA"`
+	AUTH4ME_SCHEMA string `mapstructure:"AUTH4ME_SCHEMA"`
 }
 
 var ENV Config

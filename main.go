@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/revandpratama/lognest/cmd"
 	"github.com/revandpratama/lognest/config"
 	"github.com/revandpratama/lognest/internal/app"
 	"github.com/rs/zerolog/log"
@@ -27,6 +28,10 @@ func NewServer() *Server {
 
 func main() {
 
+	if err := config.LoadConfig(); err != nil {
+		log.Fatal().Err(err).Msg("failed to load config")
+	}
+
 	var rootCmd = &cobra.Command{
 		Use:   "app",
 		Short: "My app with subcommands",
@@ -43,6 +48,9 @@ func main() {
 		Short: "Run database migrations",
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info().Msg("Running migrations...")
+
+			server := NewServer()
+			server.Migrate()
 			// run your migrations here
 		},
 	}
@@ -58,10 +66,6 @@ func main() {
 func (s *Server) Start() {
 
 	signal.Notify(s.shutdownCh, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
-
-	if err := config.LoadConfig(); err != nil {
-		log.Fatal().Err(err).Msg("failed to load config")
-	}
 
 	apps, err := app.NewApp(
 		app.WithDB(),
@@ -101,4 +105,28 @@ func randomGoodbye() string {
 	}
 
 	return byes[rand.Intn(len(byes))]
+}
+
+func (s *Server) Migrate() {
+	apps, err := app.NewApp(
+		app.WithDB(),
+	)
+
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to create app")
+	}
+
+	if err := cmd.EnsureSchema(apps.DB, config.ENV.LOGNEST_SCHEMA); err != nil {
+		log.Fatal().Err(err).Msg("failed to ensure schema")
+	}
+
+	if err := cmd.MigrateDatabase(apps.DB); err != nil {
+		log.Fatal().Err(err).Msg("failed to migrate database")
+	}
+
+	log.Info().Msg("database migrated successfully")
+
+	if err := apps.Stop(); err != nil {
+		log.Error().Err(err).Msgf("failed to stop app cleanly, cause: %v", err)
+	}
 }
