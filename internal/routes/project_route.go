@@ -22,7 +22,7 @@ func InitProjectRoutes(api fiber.Router, db *gorm.DB) {
 
 	projects.Get("/", projectHandler.FindAll)
 	projects.Get("/:id", projectHandler.FindByID)
-	projects.Get("/users/:id", projectHandler.FindByUserID)
+	projects.Get("/users/:userID", projectHandler.FindByPublicUserID)
 	projects.Get("/me", projectHandler.FindByUserID)
 	projects.Get("/slug/:slug", projectHandler.FindBySlug)
 	projects.Post("/", projectHandler.Create)

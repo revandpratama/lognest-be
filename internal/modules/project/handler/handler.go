@@ -16,6 +16,7 @@ import (
 type ProjectHandler interface {
 	FindBySlug(c *fiber.Ctx) error
 	FindByUserID(c *fiber.Ctx) error
+	FindByPublicUserID(c *fiber.Ctx) error
 	FindAll(c *fiber.Ctx) error
 	FindByID(c *fiber.Ctx) error
 	Create(c *fiber.Ctx) error
@@ -55,6 +56,33 @@ func (h *projectHandler) FindByUserID(c *fiber.Ctx) error {
 	userID, ok := c.Locals("user_id").(uuid.UUID)
 	if !ok {
 		return errorhandler.BuildError(c, errorhandler.UnauthorizedError{Message: "unauthorized: user_id not found"}, nil)
+	}
+
+	paginationQuery := new(pagination.Pagination)
+	if err := c.QueryParser(paginationQuery); err != nil {
+		return errorhandler.BuildError(c, errorhandler.BadRequestError{Message: err.Error()}, nil)
+	}
+
+	projects, pagination, err := h.ProjectRepository.FindByUserID(ctx, userID, paginationQuery)
+	if err != nil {
+		return errorhandler.BuildError(c, err, nil)
+	}
+
+	return response.Paginated(c, fiber.StatusOK, "projects found", projects, pagination)
+}
+
+func (h *projectHandler) FindByPublicUserID(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
+	defer cancel()
+
+	userIDStr := c.Params("userID")
+	if userIDStr == "" {
+		return errorhandler.BuildError(c, errorhandler.BadRequestError{Message: "id is required"}, nil)
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return errorhandler.BuildError(c, errorhandler.BadRequestError{Message: "invalid id format"}, nil)
 	}
 
 	paginationQuery := new(pagination.Pagination)
