@@ -9,10 +9,11 @@ import (
 	"github.com/revandpratama/lognest/internal/modules/project/repository"
 	"github.com/revandpratama/lognest/pkg/errorhandler"
 	"github.com/revandpratama/lognest/pkg/pagination"
+	"github.com/revandpratama/lognest/pkg/slug"
 	"gorm.io/gorm"
 )
 
-type ProjectUsecase interface{
+type ProjectUsecase interface {
 	FindBySlug(ctx context.Context, slug string) (*entity.Project, error)
 	FindByUserID(ctx context.Context, userID uuid.UUID, paginationQuery *pagination.Pagination) ([]entity.Project, *pagination.Pagination, error)
 	FindByID(ctx context.Context, id uuid.UUID) (*entity.Project, error)
@@ -65,7 +66,16 @@ func (p *projectUsecase) FindAll(ctx context.Context, paginationQuery *paginatio
 }
 
 func (p *projectUsecase) Create(ctx context.Context, newProject *entity.Project) (*entity.Project, error) {
-	return p.projectRepository.Create(ctx, newProject)
+
+	slug := slug.ToSlug(newProject.Title)
+
+	newProject.Slug = slug
+
+	project, err := p.projectRepository.Create(ctx, newProject)
+	if err != nil {
+		return nil, err
+	}
+	return project, nil
 }
 
 func (p *projectUsecase) Update(ctx context.Context, updateProject *entity.Project) (*entity.Project, error) {
