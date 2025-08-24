@@ -9,12 +9,12 @@ import (
 )
 
 type Pagination struct {
-	Limit      int    `json:"limit,omitempty"`
-	Page       int    `json:"page,omitempty"`
-	TotalRows  int64  `json:"totalRows"`
-	TotalPages int    `json:"totalPages"`
-	SortBy     string `json:"sort_by,omitempty"`
-	SortOrder  string `json:"sort_order,omitempty"`
+	Limit      int    `json:"limit,omitempty" query:"limit"`
+	Page       int    `json:"page,omitempty" query:"page"`
+	TotalRows  int64  `json:"total_rows" query:"total_rows"`
+	TotalPages int    `json:"total_pages" query:"total_pages"`
+	SortBy     string `json:"sort_by,omitempty" query:"sort_by"`
+	SortOrder  string `json:"sort_order,omitempty" query:"sort_order"`
 }
 
 func (p *Pagination) GetLimit() int {
@@ -55,7 +55,7 @@ func Paginate(db *gorm.DB, pagination *Pagination, model any, allowedSortColumns
 		if strings.ToUpper(pagination.SortOrder) == "ASC" {
 			sortOrder = "ASC"
 		}
-		
+
 		db = db.Order(pagination.SortBy + " " + sortOrder)
 	}
 
