@@ -1,9 +1,11 @@
 package entity
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/revandpratama/lognest/config"
 	"gorm.io/gorm"
 )
 
@@ -25,7 +27,7 @@ type Project struct {
 }
 
 func (Project) TableName() string {
-	return "lognest.projects"
+	return fmt.Sprintf("%s.%s", config.ENV.LOGNEST_SCHEMA, "projects")
 }
 
 func (p *Project) BeforeCreate(tx *gorm.DB) error {
