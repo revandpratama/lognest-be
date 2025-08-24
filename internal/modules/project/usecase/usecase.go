@@ -19,7 +19,7 @@ type ProjectUsecase interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*entity.Project, error)
 	FindAll(ctx context.Context, paginationQuery *pagination.Pagination) ([]entity.Project, *pagination.Pagination, error)
 	Create(ctx context.Context, newProject *entity.Project) (*entity.Project, error)
-	Update(ctx context.Context, updateProject *entity.Project) (*entity.Project, error)
+	Update(ctx context.Context, id uuid.UUID, updateProject *entity.Project) (*entity.Project, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -78,8 +78,18 @@ func (p *projectUsecase) Create(ctx context.Context, newProject *entity.Project)
 	return project, nil
 }
 
-func (p *projectUsecase) Update(ctx context.Context, updateProject *entity.Project) (*entity.Project, error) {
-	return p.projectRepository.Update(ctx, updateProject)
+func (p *projectUsecase) Update(ctx context.Context, id uuid.UUID, updateProject *entity.Project) (*entity.Project, error) {
+
+	if updateProject.Title != "" {
+		updateProject.Slug = slug.ToSlug(updateProject.Title)
+	}
+
+	project, err :=  p.projectRepository.Update(ctx, id, updateProject)
+	if err != nil {
+		return nil, err
+	}
+
+	return project, nil
 }
 
 func (p *projectUsecase) Delete(ctx context.Context, id uuid.UUID) error {

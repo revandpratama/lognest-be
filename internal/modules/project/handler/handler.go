@@ -13,7 +13,7 @@ import (
 	"github.com/revandpratama/lognest/pkg/response"
 )
 
-type ProjectHandler interface{
+type ProjectHandler interface {
 	FindBySlug(c *fiber.Ctx) error
 	FindByUserID(c *fiber.Ctx) error
 	FindAll(c *fiber.Ctx) error
@@ -131,13 +131,23 @@ func (h *projectHandler) Update(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
 	defer cancel()
 
+	idStr := c.Params("id")
+	if idStr == "" {
+		return errorhandler.BuildError(c, errorhandler.BadRequestError{Message: "id is required"}, nil)
+	}
+
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		return errorhandler.BuildError(c, errorhandler.BadRequestError{Message: "invalid id format"}, nil)
+	}
+
 	var updateProject entity.Project
 
 	if err := c.BodyParser(&updateProject); err != nil {
 		return errorhandler.BuildError(c, errorhandler.BadRequestError{Message: err.Error()}, nil)
 	}
 
-	project, err := h.ProjectRepository.Update(ctx, &updateProject)
+	project, err := h.ProjectRepository.Update(ctx, id, &updateProject)
 	if err != nil {
 		return errorhandler.BuildError(c, err, nil)
 	}

@@ -15,7 +15,7 @@ type ProjectRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*entity.Project, error)
 	FindAll(ctx context.Context, paginationQuery *pagination.Pagination) ([]entity.Project, *pagination.Pagination, error)
 	Create(ctx context.Context, newProject *entity.Project) (*entity.Project, error)
-	Update(ctx context.Context, updateProject *entity.Project) (*entity.Project, error)
+	Update(ctx context.Context, id uuid.UUID, updateProject *entity.Project) (*entity.Project, error)
 	Delete(ctx context.Context, id uuid.UUID) error
 }
 
@@ -86,8 +86,8 @@ func (r *projectRepository) Create(ctx context.Context, newProject *entity.Proje
 	return newProject, err
 }
 
-func (r *projectRepository) Update(ctx context.Context, updateProject *entity.Project) (*entity.Project, error) {
-	err := r.db.WithContext(ctx).Updates(updateProject).Error
+func (r *projectRepository) Update(ctx context.Context, id uuid.UUID, updateProject *entity.Project) (*entity.Project, error) {
+	err := r.db.WithContext(ctx).Where("id = ?", id).Updates(updateProject).Error
 
 	return updateProject, err
 }
