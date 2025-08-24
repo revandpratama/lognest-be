@@ -11,15 +11,16 @@ import (
 )
 
 type Project struct {
-	ID          uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
-	UserID      uuid.UUID      `gorm:"not null" json:"user_id"`
-	Title       string         `gorm:"type:varchar(255);not null" json:"title" validate:"required,min=5,max=255"`
-	Description string         `gorm:"type:text" json:"description"`
-	Slug        string         `gorm:"type:varchar(255);uniqueIndex;not null" json:"slug"`
-	IsPublic    *bool          `gorm:"default:true" json:"is_public"`
-	CreatedAt   time.Time      `gorm:"not null" json:"created_at"`
-	UpdatedAt   time.Time      `gorm:"not null" json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+	ID             uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	UserID         uuid.UUID      `gorm:"not null" json:"user_id"`
+	Title          string         `gorm:"type:varchar(255);not null" json:"title" validate:"required,min=5,max=255"`
+	Description    string         `gorm:"type:text" json:"description"`
+	Slug           string         `gorm:"type:varchar(255);uniqueIndex;not null" json:"slug"`
+	CoverImagePath string         `gorm:"type:varchar(255)" json:"cover_image_path"`
+	IsPublic       *bool          `gorm:"default:true" json:"is_public"`
+	CreatedAt      time.Time      `gorm:"not null" json:"created_at"`
+	UpdatedAt      time.Time      `gorm:"not null" json:"updated_at"`
+	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// --- Relationships ---
 	// User User  `gorm:"foreignKey:UserID" json:"user"`
