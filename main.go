@@ -43,17 +43,25 @@ func main() {
 		},
 	}
 
+	var fresh bool
 	var migrateCmd = &cobra.Command{
 		Use:   "migrate",
 		Short: "Run database migrations",
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Info().Msg("Running migrations...")
 
-			server := NewServer()
-			server.Migrate()
+			if fresh {
+				server := NewServer()
+				server.Migrate("fresh")
+			} else {
+				server := NewServer()
+				server.Migrate("")
+			}
+
 			// run your migrations here
 		},
 	}
+	migrateCmd.Flags().BoolVarP(&fresh, "fresh", "f", false, "Run fresh migrations")
 
 	var generateCmd = &cobra.Command{
 		Use:   "generate",
@@ -119,7 +127,7 @@ func randomGoodbye() string {
 	return byes[rand.Intn(len(byes))]
 }
 
-func (s *Server) Migrate() {
+func (s *Server) Migrate(flag string) {
 	apps, err := app.NewApp(
 		app.WithDB(),
 	)
@@ -132,8 +140,16 @@ func (s *Server) Migrate() {
 		log.Fatal().Err(err).Msg("failed to ensure schema")
 	}
 
-	if err := cmd.MigrateDatabase(apps.DB); err != nil {
-		log.Fatal().Err(err).Msg("failed to migrate database")
+	if flag == "fresh" {
+		if err := cmd.MigrateDatabaseFresh(apps.DB); err != nil {
+			log.Fatal().Err(err).Msg("failed to migrate database fresh")
+		}
+	}
+
+	if flag == "" {
+		if err := cmd.MigrateDatabase(apps.DB); err != nil {
+			log.Fatal().Err(err).Msg("failed to migrate database")
+		}
 	}
 
 	log.Info().Msg("database migrated successfully")
