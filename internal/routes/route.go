@@ -10,4 +10,8 @@ func InitRoutes(api fiber.Router, db *gorm.DB) {
 	InitProjectRoutes(api, db)
 
 	InitLogRoutes(api, db)
+
+	InitTagRoutes(api, db)
+	
+	InitUserProfileRoutes(api, db)
 }
