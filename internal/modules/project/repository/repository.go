@@ -37,7 +37,7 @@ func (r *projectRepository) FindBySlug(ctx context.Context, slug string) (*entit
 
 func (r *projectRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.Project, error) {
 	var project entity.Project
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&project).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("id = ?", id).Preload("Tags").Preload("UserProfile").Preload("Logs").First(&project).Error; err != nil {
 		return nil, err
 	}
 	return &project, nil
@@ -73,7 +73,7 @@ func (r *projectRepository) FindAll(ctx context.Context, paginationQuery *pagina
 
 	paginatedDB := pagination.Paginate(r.db, paginationQuery, &projects, allowedSortColumns)
 
-	if err := paginatedDB.Find(&projects).Error; err != nil {
+	if err := paginatedDB.Preload("Tags").Find(&projects).Error; err != nil {
 		return nil, nil, err
 	}
 	return projects, paginationQuery, nil
@@ -81,13 +81,54 @@ func (r *projectRepository) FindAll(ctx context.Context, paginationQuery *pagina
 
 func (r *projectRepository) Create(ctx context.Context, newProject *entity.Project) (*entity.Project, error) {
 
-	err := r.db.WithContext(ctx).Create(newProject).Error
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.WithContext(ctx).Omit("Tags").Create(newProject).Error; err != nil {
+			return err
+		}
+
+		if len(newProject.Tags) > 0 {
+			for _, tag := range newProject.Tags {
+				joinRecord := map[string]interface{}{
+					"project_id": newProject.ID,
+					"tag_id":     tag.ID,
+				}
+				// Use .Table() to perform a direct, raw insert.
+				if err := tx.Table("lognest.project_tags").Create(&joinRecord).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
 
 	return newProject, err
 }
 
 func (r *projectRepository) Update(ctx context.Context, id uuid.UUID, updateProject *entity.Project) (*entity.Project, error) {
-	err := r.db.WithContext(ctx).Model(&entity.Project{}).Where("id = ?", id).Updates(updateProject).Error
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.WithContext(ctx).Model(&entity.Project{}).Where("id = ?", id).Updates(updateProject).Error; err != nil {
+			return err
+		}
+
+		if len(updateProject.Tags) > 0 {
+			if err := tx.Exec("DELETE FROM lognest.project_tags WHERE project_id = ?", id).Error; err != nil {
+				return err
+			}
+			if len(updateProject.Tags) > 0 {
+				for _, tag := range updateProject.Tags {
+					joinRecord := map[string]interface{}{
+						"project_id": id,
+						"tag_id":     tag.ID,
+					}
+					if err := tx.Table("lognest.project_tags").Create(&joinRecord).Error; err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	})
 
 	return updateProject, err
 }
