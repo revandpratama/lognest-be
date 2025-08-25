@@ -11,15 +11,15 @@ import (
 
 // Log represents the data structure for a log.
 type Log struct {
-	ID           uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
-	UserID       uuid.UUID      `gorm:"not null" json:"user_id"`
-	ProjectID    uuid.UUID      `gorm:"not null" json:"project_id"`
-	Content      string         `gorm:"type:text;not null" json:"content" validate:"required"`
-	LikeCount    int            `gorm:"default:0" json:"like_count"`
-	CommentCount int            `gorm:"default:0" json:"comment_count"`
-	CreatedAt    time.Time      `gorm:"not null" json:"created_at"`
-	UpdatedAt    time.Time      `gorm:"not null" json:"updated_at"`
-	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+	ID            uuid.UUID      `gorm:"type:uuid;primary_key" json:"id"`
+	UserProfileID uuid.UUID      `gorm:"not null" json:"user_profile_id"`
+	ProjectID     uuid.UUID      `gorm:"not null" json:"project_id"`
+	Content       string         `gorm:"type:text;not null" json:"content" validate:"required"`
+	LikeCount     int            `gorm:"default:0" json:"like_count"`
+	CommentCount  int            `gorm:"default:0" json:"comment_count"`
+	CreatedAt     time.Time      `gorm:"not null" json:"created_at"`
+	UpdatedAt     time.Time      `gorm:"not null" json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 
 	Media []Media `gorm:"foreignKey:LogID;references:ID;constraint:OnDelete:CASCADE;" json:"media,omitempty"`
 }
