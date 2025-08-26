@@ -31,7 +31,7 @@ func NewLogRepository(db *gorm.DB) LogRepository {
 
 func (r *logRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.Log, error) {
 	var log entity.Log
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&log).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("id = ?", id).Preload("Comments").Preload("Media").First(&log).Error; err != nil {
 		return nil, err
 	}
 	return &log, nil
@@ -50,7 +50,7 @@ func (r *logRepository) FindByProjectID(ctx context.Context, projectID uuid.UUID
 
 	paginatedDB := pagination.Paginate(query, paginationQuery, &logs, allowedSortColumns)
 
-	if err := paginatedDB.Find(&logs).Error; err != nil {
+	if err := paginatedDB.Preload("Comments").Preload("Media").Find(&logs).Error; err != nil {
 		return nil, nil, err
 	}
 	return logs, paginationQuery, nil

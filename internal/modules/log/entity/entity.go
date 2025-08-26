@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/revandpratama/lognest/config"
+	interactionEntity "github.com/revandpratama/lognest/internal/modules/interaction/entity"
 	"gorm.io/gorm"
 )
 
@@ -21,7 +22,8 @@ type Log struct {
 	UpdatedAt     time.Time      `gorm:"not null" json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
 
-	Media []Media `gorm:"foreignKey:LogID;references:ID;constraint:OnDelete:CASCADE;" json:"media,omitempty"`
+	Media    []Media                     `gorm:"foreignKey:LogID;references:ID;constraint:OnDelete:CASCADE;" json:"media,omitempty"`
+	Comments []interactionEntity.Comment `gorm:"foreignKey:LogID;references:ID;constraint:OnDelete:CASCADE;" json:"comments,omitempty"`
 }
 
 type Media struct {
