@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 
+	interactionEntity "github.com/revandpratama/lognest/internal/modules/interaction/entity"
 	logEntity "github.com/revandpratama/lognest/internal/modules/log/entity"
 	projectEntity "github.com/revandpratama/lognest/internal/modules/project/entity"
 	tagEntity "github.com/revandpratama/lognest/internal/modules/tag/entity"
@@ -19,6 +20,8 @@ var models = []interface{}{
 	&tagEntity.Tag{},
 	&logEntity.Log{},
 	&userProfileEntity.UserProfile{},
+	&interactionEntity.Comment{},
+	&interactionEntity.Like{},
 }
 
 func MigrateDatabase(db *gorm.DB) error {
