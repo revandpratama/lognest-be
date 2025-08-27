@@ -2,6 +2,7 @@ package route
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/revandpratama/lognest/internal/middlewares"
 	"github.com/revandpratama/lognest/internal/modules/project/handler"
 	"github.com/revandpratama/lognest/internal/modules/project/repository"
 	"github.com/revandpratama/lognest/internal/modules/project/usecase"
@@ -19,6 +20,8 @@ func InitProjectRoutes(api fiber.Router, db *gorm.DB) {
 	projectHandler := initProjectHandler(db)
 
 	projects := api.Group("/projects")
+
+	projects.Use(middlewares.AuthMiddleware())
 
 	projects.Get("/", projectHandler.FindAll)
 	projects.Get("/:id", projectHandler.FindByID)

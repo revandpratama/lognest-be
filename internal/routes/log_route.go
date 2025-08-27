@@ -2,6 +2,7 @@ package route
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/revandpratama/lognest/internal/middlewares"
 	"github.com/revandpratama/lognest/internal/modules/log/handler"
 	"github.com/revandpratama/lognest/internal/modules/log/repository"
 	"github.com/revandpratama/lognest/internal/modules/log/usecase"
@@ -20,6 +21,8 @@ func InitLogRoutes(api fiber.Router, db *gorm.DB) {
 	logHandler := InitLogHandlers(db)
 
 	log := api.Group("/logs")
+
+	log.Use(middlewares.AuthMiddleware())
 
 	log.Get("/projects/:projectID", logHandler.FindByProjectID)
 	log.Get("/:id", logHandler.FindByID)

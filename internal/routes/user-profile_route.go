@@ -2,6 +2,7 @@ package route
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/revandpratama/lognest/internal/middlewares"
 	"github.com/revandpratama/lognest/internal/modules/user-profile/handler"
 	"github.com/revandpratama/lognest/internal/modules/user-profile/repository"
 	"github.com/revandpratama/lognest/internal/modules/user-profile/usecase"
@@ -20,7 +21,9 @@ func InitUserProfileRoutes(api fiber.Router, db *gorm.DB) {
 
 	profiles := api.Group("/profiles")
 
-	profiles.Post("/", userProfileHandler.Create)
+	profiles.Use(middlewares.AuthMiddleware())
+
+	// profiles.Post("/", userProfileHandler.Create)
 	profiles.Get("/:id", userProfileHandler.FindByID)
-	profiles.Put("/:id", userProfileHandler.Update)
+	// profiles.Put("/:id", userProfileHandler.Update)
 }

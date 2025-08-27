@@ -2,6 +2,7 @@ package route
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/revandpratama/lognest/internal/middlewares"
 	"github.com/revandpratama/lognest/internal/modules/interaction/handler"
 	"github.com/revandpratama/lognest/internal/modules/interaction/repository"
 	"github.com/revandpratama/lognest/internal/modules/interaction/usecase"
@@ -19,6 +20,8 @@ func InitInteractionRoutes(api fiber.Router, db *gorm.DB) {
 	interactionHandler := initInteractionHandler(db)
 
 	interaction := api.Group("/interactions")
+
+	interaction.Use(middlewares.AuthMiddleware())
 
 	interaction.Post("/likes", interactionHandler.CreateLike)
 	interaction.Delete("/likes/:likeID", interactionHandler.DeleteLike)
