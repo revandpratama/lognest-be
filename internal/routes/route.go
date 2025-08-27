@@ -1,11 +1,13 @@
 package route
 
 import (
+	"net/http"
+
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
-func InitRoutes(api fiber.Router, db *gorm.DB) {
+func InitRoutes(api fiber.Router, db *gorm.DB, httpClient *http.Client) {
 
 	InitProjectRoutes(api, db)
 
@@ -16,4 +18,6 @@ func InitRoutes(api fiber.Router, db *gorm.DB) {
 	InitUserProfileRoutes(api, db)
 
 	InitInteractionRoutes(api, db)
+
+	InitAuthRoute(api, db, httpClient)
 }
