@@ -15,6 +15,8 @@ func BuildError(c *fiber.Ctx, err error, errors []string) error {
 		statusCode = fiber.StatusUnauthorized
 	case InternalServerError:
 		statusCode = fiber.StatusInternalServerError
+	case ConflictError:
+		statusCode = fiber.StatusConflict
 	default:
 		statusCode = fiber.StatusInternalServerError
 	}
