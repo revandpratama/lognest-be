@@ -11,13 +11,12 @@ import (
 func AuthMiddleware() func(c *fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 
-		authHeader := c.Get("Authorization")
-
-		if c.Get("Authorization") == "" {
+		access_token := c.Cookies("access_token")
+		if access_token == "" {
 			return errorhandler.BuildError(c, errorhandler.UnauthorizedError{Message: "unauthorized, no token provided"}, nil)
 		}
 
-		parts := strings.Split(authHeader, " ")
+		parts := strings.Split(access_token, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
 			return errorhandler.BuildError(c, errorhandler.UnauthorizedError{Message: "unauthorized, invalid token format"}, nil)
 		}
