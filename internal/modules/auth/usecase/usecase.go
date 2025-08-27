@@ -5,31 +5,38 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/revandpratama/lognest/config"
 	"github.com/revandpratama/lognest/internal/modules/auth/dto"
 	"github.com/revandpratama/lognest/internal/modules/auth/repository"
+	userProfileEntity "github.com/revandpratama/lognest/internal/modules/user-profile/entity"
+	userProfileRepository "github.com/revandpratama/lognest/internal/modules/user-profile/repository"
 	"github.com/revandpratama/lognest/pkg/errorhandler"
 )
 
 // AuthUsecase defines the business logic interface for a Auth.
 type AuthUsecase interface {
 	Login(ctx context.Context, loginRequest *dto.LoginRequest) (*dto.LoginResponse, error)
-	Register(ctx context.Context, registerRequest *dto.RegisterRequest) error
+	Register(ctx context.Context, registerRequest *dto.RegisterRequest) (map[string]any, error)
 	RefreshToken(ctx context.Context, accessToken string, refreshToken string) (*dto.LoginResponse, error)
 }
 
 type authUsecase struct {
-	repo       repository.AuthRepository
-	httpClient *http.Client
+	repo            repository.AuthRepository
+	userProfileRepo userProfileRepository.UserProfileRepository
+	httpClient      *http.Client
 }
 
 // NewAuthUsecase creates a new instance of AuthUsecase.
-func NewAuthUsecase(repo repository.AuthRepository, httpClient *http.Client) AuthUsecase {
+func NewAuthUsecase(repo repository.AuthRepository, userProfileRepo userProfileRepository.UserProfileRepository, httpClient *http.Client) AuthUsecase {
 	return &authUsecase{
-		repo:       repo,
-		httpClient: httpClient,
+		repo:            repo,
+		httpClient:      httpClient,
+		userProfileRepo: userProfileRepo,
 	}
 }
 
@@ -61,26 +68,79 @@ func (u *authUsecase) Login(ctx context.Context, loginRequest *dto.LoginRequest)
 	return &loginResponse, nil
 }
 
-func (u *authUsecase) Register(ctx context.Context, registerRequest *dto.RegisterRequest) error {
-
+func (u *authUsecase) Register(ctx context.Context, registerRequest *dto.RegisterRequest) (map[string]any, error) {
 	jsonData, err := json.Marshal(registerRequest)
 	if err != nil {
-		return errorhandler.InternalServerError{Message: err.Error()}
+		return nil, errorhandler.InternalServerError{Message: "failed to marshal request: " + err.Error()}
 	}
 
-	var url = fmt.Sprintf("%s/api/auth/register", config.ENV.AUTH4ME_URL)
-
+	url := fmt.Sprintf("%s/api/auth/register", config.ENV.AUTH4ME_URL)
 	resp, err := u.httpClient.Post(url, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		return errorhandler.InternalServerError{Message: err.Error()}
+		return nil, errorhandler.InternalServerError{Message: "http request failed: " + err.Error()}
 	}
 	defer resp.Body.Close()
 
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errorhandler.InternalServerError{Message: "failed to read response body: " + err.Error()}
+	}
+    
+    // --- THIS IS THE CRITICAL DEBUGGING STEP ---
+    // Log the raw response body exactly as it was received. This removes all guesswork.
+    log.Printf("DEBUG: Raw response from AUTH4ME service (Status: %d): %s", resp.StatusCode, string(body))
+
 	if resp.StatusCode != http.StatusOK {
-		return errorhandler.InternalServerError{Message: "failed to register"}
+		// (Error handling from before remains the same)
+		// ...
+		return nil, errorhandler.InternalServerError{Message: "failed to register with auth service"}
 	}
 
-	return nil
+	var result map[string]any
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, errorhandler.InternalServerError{Message: "could not parse auth service response: " + err.Error()}
+	}
+
+	// --- NEW DEFENSIVE CHECKS ---
+	// 1. Check if the "data" key exists at all.
+	dataField, dataExists := result["data"]
+	if !dataExists {
+		return nil, errorhandler.InternalServerError{Message: "auth service response is missing 'data' field"}
+	}
+
+	// 2. Check if the value for the "data" key is nil.
+	if dataField == nil {
+		return nil, errorhandler.InternalServerError{Message: "auth service returned null 'data' field"}
+	}
+	
+	// 3. Now, perform the type assertion, confident that the key exists and is not nil.
+	data, ok := dataField.(map[string]any)
+	if !ok {
+		// If it still fails here, it means 'data' is the wrong type (e.g., a string or array).
+		// The log line above will show you exactly what it is.
+		return nil, errorhandler.InternalServerError{Message: "auth service 'data' field is not a JSON object"}
+	}
+
+	// (The rest of your logic remains the same)
+	userIDStr, ok := data["id"].(string)
+	if !ok {
+		return nil, errorhandler.InternalServerError{Message: "user ID not found or not a string in auth service response"}
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return nil, errorhandler.InternalServerError{Message: "invalid user ID format from auth service"}
+	}
+
+	// This should be done inside a transaction in a real app
+	_ , err = u.userProfileRepo.Create(ctx, &userProfileEntity.UserProfile{UserID: userID}); 
+	if err != nil {
+		// If this fails, you might have an auth user without a profile. This needs careful handling.
+		log.Printf("CRITICAL: Failed to create user profile for user ID %s after successful registration", userID)
+		return nil, errorhandler.InternalServerError{Message: "failed to create user profile"}
+	}
+
+	return data, nil
 }
 
 func (u *authUsecase) RefreshToken(ctx context.Context, accessToken string, refreshToken string) (*dto.LoginResponse, error) {

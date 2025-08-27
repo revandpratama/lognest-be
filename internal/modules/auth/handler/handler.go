@@ -84,12 +84,12 @@ func (u *authHandler) Register(c *fiber.Ctx) error {
 		return errorhandler.BuildError(c, errorhandler.BadRequestError{Message: err.Error()}, nil)
 	}
 
-	err := u.usecase.Register(ctx, &registerRequest)
+	data, err := u.usecase.Register(ctx, &registerRequest)
 	if err != nil {
 		return errorhandler.BuildError(c, err, nil)
 	}
 
-	return response.Success(c, fiber.StatusOK, "register success", nil)
+	return response.Success(c, fiber.StatusOK, "register success", data)
 }
 
 func (u *authHandler) RefreshToken(c *fiber.Ctx) error {
