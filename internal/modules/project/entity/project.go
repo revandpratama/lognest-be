@@ -25,7 +25,7 @@ type Project struct {
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
 
 	// --- Relationships ---
-	UserProfile userProfileEntity.UserProfile `gorm:"foreignKey:UserID;references:ID" json:"user_profile"`
+	UserProfile userProfileEntity.UserProfile `gorm:"foreignKey:UserProfileID;references:UserID" json:"user_profile"`
 	Logs        []logEntity.Log               `gorm:"foreignKey:ProjectID;references:ID;constraint:OnDelete:CASCADE;" json:"logs,omitempty"` // CASCADE means if project is deleted, its logs are too
 	Tags        []tagEntity.Tag               `gorm:"many2many:lognest.project_tags;constraint:OnDelete:CASCADE;" json:"tags,omitempty"`
 }
