@@ -27,7 +27,7 @@ type UserProfile struct {
 	// Users that follow this user
 	Followers []UserProfile `gorm:"many2many:user_followers;foreignKey:UserID;joinForeignKey:FollowingID;References:UserID;joinReferences:FollowerID" json:"followers,omitempty"`
 
-	User User  `gorm:"-" json:"user,omitzero"`
+	User User `gorm:"-" json:"user,omitzero"`
 }
 
 type User struct {
@@ -36,7 +36,7 @@ type User struct {
 	FirstName     string    `gorm:"size:255" json:"first_name"`
 	LastName      string    `gorm:"size:255" json:"last_name"`
 	AvatarPath    string    `gorm:"size:500" json:"avatar_path"`
-	EmailVerified *bool     `gorm:"default:false" json:"email_verified"`
+	EmailVerified bool      `gorm:"default:false" json:"email_verified"`
 }
 
 // TableName sets the table name for the UserProfile.
