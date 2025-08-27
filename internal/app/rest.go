@@ -2,11 +2,15 @@ package app
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/encryptcookie"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/revandpratama/lognest/config"
 	route "github.com/revandpratama/lognest/internal/routes"
 
@@ -37,6 +41,25 @@ func WithRESTServer() Option {
 			},
 		}))
 
+		fiberApp.Use(cors.New(cors.Config{
+			AllowOrigins:     config.ENV.CORS_ALLOWED_ORIGINS,
+			// AllowCredentials: true,
+			AllowHeaders:     "Origin, Content-Type, Accept, Content-Length, Authorization, Accept-Encoding, X-CSRF-Token, X-Requested-With, X-Refresh-Token",
+		}))
+
+		fiberApp.Use(encryptcookie.New(encryptcookie.Config{
+			Key: config.ENV.COOKIE_SECRET,
+		}))
+
+		fiberApp.Use(logger.New(logger.Config{
+			Format:        "${time} | ${status} | ${latency} | ${ip} | ${method} | ${path} | ${error}\n",
+			TimeFormat:    "15:04:05",
+			TimeZone:      "Local",
+			TimeInterval:  500 * time.Millisecond,
+			Output:        os.Stdout,
+			DisableColors: false,
+		}))
+
 		fiberApp.Get("/hello", func(c *fiber.Ctx) error {
 			return c.SendString("Hello, World!")
 		})
@@ -48,8 +71,10 @@ func WithRESTServer() Option {
 			return c.SendString("Hello. 700ms delay!")
 		})
 
+		httpClient := &http.Client{}
+
 		// * Initialize routes
-		route.InitRoutes(api, app.DB)
+		route.InitRoutes(api, app.DB, httpClient)
 
 		app.fiberApp = fiberApp
 
