@@ -9,7 +9,16 @@ import (
 )
 
 type Config struct {
+	APP_ENV string `mapstructure:"APP_ENV"`
+
 	REST_PORT string `mapstructure:"REST_PORT"`
+
+	AUTH4ME_URL string `mapstructure:"AUTH4ME_URL"`
+
+	CORS_ALLOWED_ORIGINS string `mapstructure:"CORS_ALLOWED_ORIGINS"`
+	CORS_ALLOWED_HEADERS string `mapstructure:"CORS_ALLOWED_HEADERS"`
+
+	COOKIE_SECRET string `mapstructure:"COOKIE_SECRET"`
 
 	JWT_SECRET            string `mapstructure:"JWT_SECRET"`
 	JWT_EXPIRATION_SECOND string `mapstructure:"JWT_EXPIRATION_SECOND"`
