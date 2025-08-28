@@ -12,8 +12,12 @@ import (
 
 // UserProfile represents the data structure for a userprofile.
 type UserProfile struct {
-	UserID uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	Bio    string    `gorm:"type:text" json:"bio"`
+	UserID        uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
+	Bio           string    `gorm:"type:text" json:"bio"`
+	Email         string    `gorm:"uniqueIndex;not null" json:"email"`
+	FirstName     string    `gorm:"size:255" json:"first_name"`
+	LastName      string    `gorm:"size:255" json:"last_name"`
+	AvatarPath    string    `gorm:"size:500" json:"avatar_path"`
 
 	// --- Counters (cached from Redis, synced periodically) ---
 	FollowerCount  int `gorm:"default:0" json:"follower_count"`
