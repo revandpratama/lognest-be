@@ -31,6 +31,10 @@ type Config struct {
 
 	LOGNEST_SCHEMA string `mapstructure:"LOGNEST_SCHEMA"`
 	AUTH4ME_SCHEMA string `mapstructure:"AUTH4ME_SCHEMA"`
+
+	AZURE_STORAGE_CONNECTION_STRING              string `mapstructure:"AZURE_STORAGE_CONNECTION_STRING"`
+	AZURE_STORAGE_CONTAINER_NAME                 string `mapstructure:"AZURE_STORAGE_CONTAINER_NAME"`
+	AZURE_STORAGE_URL_EXPIRY_DURATION_IN_MINUTES string `mapstructure:"AZURE_STORAGE_URL_EXPIRY_DURATION_IN_MINUTES"`
 }
 
 var ENV Config
