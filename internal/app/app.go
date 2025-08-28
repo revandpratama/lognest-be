@@ -4,14 +4,16 @@ import (
 	"context"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
 type App struct {
-	fiberApp *fiber.App
-	DB       *gorm.DB
+	fiberApp     *fiber.App
+	DB           *gorm.DB
+	AzblobClient *azblob.Client
 }
 
 type Option func(*App) error

@@ -89,6 +89,7 @@ func (s *Server) Start() {
 
 	apps, err := app.NewApp(
 		app.WithDB(),
+		app.WithAzureBlobStorage(),
 		app.WithRESTServer(),
 	)
 	if err != nil {

@@ -74,7 +74,7 @@ func WithRESTServer() Option {
 		httpClient := &http.Client{}
 
 		// * Initialize routes
-		route.InitRoutes(api, app.DB, httpClient)
+		route.InitRoutes(api, app.DB, httpClient, app.AzblobClient)
 
 		app.fiberApp = fiberApp
 
