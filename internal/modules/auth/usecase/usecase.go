@@ -119,7 +119,15 @@ func (u *authUsecase) Register(ctx context.Context, registerRequest *dto.Registe
 		return nil, errorhandler.InternalServerError{Message: "invalid user ID format from auth service"}
 	}
 
-	_, err = u.userProfileRepo.Create(ctx, &userProfileEntity.UserProfile{UserID: userID})
+	newUserProfile := &userProfileEntity.UserProfile{
+		UserID:     userID,
+		FirstName:  registerRequest.FirstName,
+		Email:      registerRequest.Email,
+		LastName:   registerRequest.LastName,
+		AvatarPath: registerRequest.AvatarPath,
+	}
+
+	_, err = u.userProfileRepo.Create(ctx, newUserProfile)
 	if err != nil {
 		log.Printf("CRITICAL: Failed to create user profile for user ID %s after successful registration", userID)
 		return nil, errorhandler.InternalServerError{Message: "failed to create user profile"}

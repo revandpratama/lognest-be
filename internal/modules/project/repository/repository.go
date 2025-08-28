@@ -29,7 +29,7 @@ func NewProjectRepository(db *gorm.DB) ProjectRepository {
 
 func (r *projectRepository) FindBySlug(ctx context.Context, slug string) (*entity.Project, error) {
 	var project entity.Project
-	if err := r.db.WithContext(ctx).Where("slug = ?", slug).First(&project).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("slug = ?", slug).Preload("UserProfile").First(&project).Error; err != nil {
 		return nil, err
 	}
 	return &project, nil
@@ -52,7 +52,7 @@ func (r *projectRepository) FindByUserID(ctx context.Context, userID uuid.UUID, 
 		"is_public",
 	}
 
-	query := r.db.WithContext(ctx).Where("user_id = ?", userID)
+	query := r.db.WithContext(ctx).Preload("UserProfile").Where("user_id = ?", userID)
 
 	paginatedDB := pagination.Paginate(query, paginationQuery, &projects, allowedSortColumns)
 
@@ -73,7 +73,7 @@ func (r *projectRepository) FindAll(ctx context.Context, paginationQuery *pagina
 
 	paginatedDB := pagination.Paginate(r.db, paginationQuery, &projects, allowedSortColumns)
 
-	if err := paginatedDB.Preload("Tags").Find(&projects).Error; err != nil {
+	if err := paginatedDB.Preload("Tags").Preload("UserProfile").Find(&projects).Error; err != nil {
 		return nil, nil, err
 	}
 	return projects, paginationQuery, nil
