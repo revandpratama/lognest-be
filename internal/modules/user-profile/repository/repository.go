@@ -36,13 +36,13 @@ func (r *userprofileRepository) Create(ctx context.Context, newUserProfile *enti
 
 func (r *userprofileRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.UserProfile, error) {
 	var userProfile entity.UserProfile
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&userProfile).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("user_id = ?", id).First(&userProfile).Error; err != nil {
 		return nil, err
 	}
 	return &userProfile, nil
 }
 
 func (r *userprofileRepository) Update(ctx context.Context, id uuid.UUID, updateUserProfile *entity.UserProfile) (*entity.UserProfile, error) {
-	err := r.db.WithContext(ctx).Model(&entity.UserProfile{}).Where("id = ?", id).Updates(updateUserProfile).Error
+	err := r.db.WithContext(ctx).Model(&entity.UserProfile{}).Where("user_id = ?", id).Updates(updateUserProfile).Error
 	return updateUserProfile, err
 }

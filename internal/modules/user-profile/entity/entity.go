@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/revandpratama/lognest/config"
+	"github.com/revandpratama/lognest/internal/modules/user-profile/dto"
 	"gorm.io/gorm"
 )
 
@@ -27,17 +28,17 @@ type UserProfile struct {
 	// Users that follow this user
 	Followers []UserProfile `gorm:"many2many:user_followers;foreignKey:UserID;joinForeignKey:FollowingID;References:UserID;joinReferences:FollowerID" json:"followers,omitempty"`
 
-	User User `gorm:"-" json:"user,omitzero"`
+	User dto.User `gorm:"-" json:"user,omitzero"`
 }
 
-type User struct {
-	ID            uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
-	Email         string    `gorm:"uniqueIndex;not null" json:"email"`
-	FirstName     string    `gorm:"size:255" json:"first_name"`
-	LastName      string    `gorm:"size:255" json:"last_name"`
-	AvatarPath    string    `gorm:"size:500" json:"avatar_path"`
-	EmailVerified bool      `gorm:"default:false" json:"email_verified"`
-}
+// type User struct {
+// 	ID            uuid.UUID `gorm:"type:uuid;primary_key" json:"id"`
+// 	Email         string    `gorm:"uniqueIndex;not null" json:"email"`
+// 	FirstName     string    `gorm:"size:255" json:"first_name"`
+// 	LastName      string    `gorm:"size:255" json:"last_name"`
+// 	AvatarPath    string    `gorm:"size:500" json:"avatar_path"`
+// 	EmailVerified bool      `gorm:"default:false" json:"email_verified"`
+// }
 
 // TableName sets the table name for the UserProfile.
 func (UserProfile) TableName() string {

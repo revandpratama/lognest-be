@@ -16,7 +16,7 @@ func InitRoutes(api fiber.Router, db *gorm.DB, httpClient *http.Client, azureCli
 
 	InitTagRoutes(api, db)
 
-	InitUserProfileRoutes(api, db)
+	InitUserProfileRoutes(api, db, httpClient)
 
 	InitInteractionRoutes(api, db)
 

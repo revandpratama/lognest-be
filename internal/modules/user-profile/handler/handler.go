@@ -17,6 +17,7 @@ type UserProfileHandler interface {
 	Create(c *fiber.Ctx) error
 	FindByID(c *fiber.Ctx) error
 	Update(c *fiber.Ctx) error
+	FindUser(c *fiber.Ctx) error
 }
 
 type userprofileHandler struct {
@@ -87,4 +88,21 @@ func (h *userprofileHandler) Update(c *fiber.Ctx) error {
 	}
 
 	return response.Success(c, fiber.StatusOK, "user profile updated", userProfile)
+}
+
+func (h *userprofileHandler) FindUser(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(c.Context(), 5*time.Second)
+	defer cancel()
+
+	tokenStr := c.Cookies("access_token")
+	if tokenStr == "" {
+		return errorhandler.BuildError(c, errorhandler.UnauthorizedError{Message: "unauthorized, no access token provided"}, nil)
+	}
+
+	userProfile, err := h.usecase.FindUser(ctx, tokenStr)
+	if err != nil {
+		return errorhandler.BuildError(c, err, nil)
+	}
+
+	return response.Success(c, fiber.StatusOK, "user profile found", userProfile)
 }
